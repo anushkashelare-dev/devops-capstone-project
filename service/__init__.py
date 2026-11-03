@@ -7,12 +7,21 @@ database, and HTTP security headers.
 import sys
 from flask import Flask
 from flask_talisman import Talisman
+from flask_cors import CORS
 from service import config
 from service.common import log_handlers
 
 # Create Flask application
 app = Flask(__name__)
 app.config.from_object(config)
+
+# Enable Cross-Origin Resource Sharing for the REST API.
+CORS(
+    app,
+    resources={r"/*": {"origins": "*"}},
+    methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization"],
+)
 
 # Configure HTTP security headers with Flask-Talisman.
 # HTTPS redirection is disabled for local development and test environments.
