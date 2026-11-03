@@ -1,11 +1,12 @@
 """
 Package: service
 Package for the application models and service routes
-This module creates and configures the Flask app and sets up the logging
-and SQL database
+This module creates and configures the Flask app and sets up the logging,
+database, and HTTP security headers.
 """
 import sys
 from flask import Flask
+from flask_talisman import Talisman
 from service import config
 from service.common import log_handlers
 
@@ -13,7 +14,24 @@ from service.common import log_handlers
 app = Flask(__name__)
 app.config.from_object(config)
 
-# Import the routes After the Flask app is created
+# Configure HTTP security headers with Flask-Talisman.
+# HTTPS redirection is disabled for local development and test environments.
+Talisman(
+    app,
+    force_https=False,
+    strict_transport_security=True,
+    session_cookie_secure=True,
+    content_security_policy={
+        "default-src": ["'self'"],
+        "object-src": ["'none'"],
+        "base-uri": ["'self'"],
+        "frame-ancestors": ["'none'"],
+    },
+    content_security_policy_nonce_in=["script-src"],
+    referrer_policy="strict-origin-when-cross-origin",
+)
+
+# Import the routes after the Flask app is created
 # pylint: disable=wrong-import-position, cyclic-import, wrong-import-order
 from service import routes, models  # noqa: F401 E402
 
